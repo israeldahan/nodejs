@@ -1,11 +1,18 @@
+require('dotenv').config()
 const express = require('express')
 const serverLog = require('./serverLog')
 const addDate = require('./middleware/addDate')
 const addResponseHeader = require('./middleware/addResponseHeader')
 const moviesRouter = require('./routers/movies-router')
+const {  connect } = require('./DB')
+
+
 
 const app = express()
 const port = 8080
+
+ connect()
+
 
 app.use(serverLog, addDate, addResponseHeader)
 
@@ -52,6 +59,12 @@ app.use( (err, req, res, next) => {
   }
   return res.status(err.statusCode).json({ error: err.message })
 })
+
+// await connect()
+
+// const listDatabases = async (client) => {
+// }
+//  listDatabases()
 
 const server = app.listen(8080, () => console.log(`server started on port ${port}`))
 module.exports = { app, server }

@@ -31,6 +31,17 @@ async function getById(request, response) {
   }
 }
 
+async function getByTitle(request, response) {
+  const { title } = request.params
+  const movies = await MoviesService.getByTitle(title)
+
+  if (!!movies) {
+    return response.status(200).json(movies)
+  } else {
+    return response.status(404).json({ error: `no movie with title ${title}` })
+  }
+}
+
 async function createMovie(request, response, next) {
   const { title, img, synopsis, rating, year } = request.body
 
@@ -77,7 +88,7 @@ async function upsertMovie(request, response, next) {
   const doesMovieExist = !!movie
 
   if (doesMovieExist) {
-    const updatedMovie = await MoviesService.updateMovie(movie.id, { title, img, synopsis, rating, year })
+    const updatedMovie = await MoviesService.updateMovie(movie._id.toString(), { title, img, synopsis, rating, year })
     return response.status(200).json(updatedMovie)
   } else {
     const newMovie = await MoviesService.createMovie({ title, img, synopsis, rating, year })
@@ -86,7 +97,7 @@ async function upsertMovie(request, response, next) {
 }
 
 async function modifyMovie(request, response) {
-  const movieId = parseInt(request.params.id)
+  const movieId = request.params.id
   const movie = await MoviesService.getById(movieId)
   const doesMovieExist = !!movie
 
@@ -103,7 +114,7 @@ async function modifyMovie(request, response) {
     ...(year && { year }),
   }
   const patchedMovieAtrributes = { ...movie, ...definedParams }
-  const updatedMovie = await MoviesService.updateMovie(movie.id, patchedMovieAtrributes)
+  const updatedMovie = await MoviesService.updateMovie(movie._id, patchedMovieAtrributes)
   return response.status(200).json(updatedMovie)
 }
 
@@ -118,4 +129,4 @@ async function deleteMovie(request, response) {
   return response.status(200).json(deletedMovie)
 }
 
-module.exports = { getMovies, getById, createMovie, upsertMovie, modifyMovie, deleteMovie }
+module.exports = { getMovies, getById, getByTitle, createMovie, upsertMovie, modifyMovie, deleteMovie }

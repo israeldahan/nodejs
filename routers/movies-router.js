@@ -4,6 +4,7 @@ const checkLegalID = require('../middleware/checkLegalID')
 const {
   getMovies,
   getById,
+  getByTitle,
   createMovie,
   upsertMovie,
   modifyMovie,
@@ -14,6 +15,7 @@ const moviesRouter = express.Router()
 
 moviesRouter.get('/', getMovies)
 moviesRouter.get('/:id', checkLegalID, getById)
+moviesRouter.get('/title/:title', getByTitle)
 moviesRouter.post('/', createMovie)
 moviesRouter.put('/', upsertMovie)
 moviesRouter.patch('/:id', checkLegalID, modifyMovie)

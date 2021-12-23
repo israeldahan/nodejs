@@ -1,77 +1,67 @@
+const { connect, client, updateMovieByID, updateMovieByTitle, findMovieByID, findMovieManyByTitle, findMovieByTitle, findMovies, createListing } = require('../DB')
 const INITIAL_MOVIES = require('./movies.json')
+
 
 let allMovies = []
 let currentIndex = 0
 
 async function getAllMovies() {
-  return [...allMovies]
+  const movies = await findMovies(client)
+  return movies
+
 }
 
 async function getById(id) {
-  const movies = await getAllMovies()
-  return movies.find((movie) => movie.id === id)
+  const movies = await findMovieByID(client, id)
+  return movies
 }
 
 async function getByTitle(title) {
-  const movies = await getAllMovies()
-  return movies.find((movie) => movie.title === title)
+  const movies = await findMovieByTitle(client, title)
+  return movies
+}
+
+async function getManyByTitle(title) {
+  const movies = await findMovieManyByTitle(client, title)
+  return movies
 }
 
 async function createMovie({ title, img, synopsis, rating, year }) {
   const newMovie = {
-    id: getNextIndex(),
     title,
     img,
     synopsis,
     rating,
     year,
   }
-
-  allMovies = [...allMovies, newMovie]
+  await createListing(client, newMovie)
   return newMovie
 }
 
 async function updateMovie(id, { title, img, synopsis, rating, year }) {
   const movie = await getById(id)
-  const movieIndex = allMovies.indexOf(movie)
-  const newMovieObject = {
-    id,
+  const newMovie = {
     title,
     img,
     synopsis,
     rating,
     year,
   }
+  await updateMovieByID(client, movie._id, newMovie)
 
-  const newAlMovies = [...allMovies]
-  newAlMovies[movieIndex] = newMovieObject
-  allMovies = newAlMovies
 
-  return newMovieObject
+  return newMovie
 }
 
 async function deleteMovie(id) {
   const movie = await getById(id)
 
   if (movie) {
-    const movieIndex = allMovies.indexOf(movie)
-    const newAllMovies = [...allMovies]
-    newAllMovies.splice(movieIndex, 1)
-    allMovies = newAllMovies
+
   }
 
   return movie
 }
 
-function init() {
-  allMovies = [...INITIAL_MOVIES.movies]
-  currentIndex = allMovies[allMovies.length - 1].id
-}
-
-function getNextIndex() {
-  return ++currentIndex
-}
-
-init()
 
 module.exports = { getAllMovies, getById, getByTitle, createMovie, updateMovie, deleteMovie, init }
