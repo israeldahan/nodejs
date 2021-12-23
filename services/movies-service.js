@@ -1,6 +1,15 @@
-const { connect, client, updateMovieByID, updateMovieByTitle, findMovieByID, findMovieManyByTitle, findMovieByTitle, findMovies, createListing } = require('../DB')
-const INITIAL_MOVIES = require('./movies.json')
-
+const {
+  connect,
+  client,
+  updateMovieByID,
+  updateMovieByTitle,
+  findMovieByID,
+  findMovieManyByTitle,
+  findMovieByTitle,
+  findMovies,
+  createListing,
+  deleteMovieByID
+} = require('../DB')
 
 let allMovies = []
 let currentIndex = 0
@@ -8,7 +17,6 @@ let currentIndex = 0
 async function getAllMovies() {
   const movies = await findMovies(client)
   return movies
-
 }
 
 async function getById(id) {
@@ -49,19 +57,15 @@ async function updateMovie(id, { title, img, synopsis, rating, year }) {
   }
   await updateMovieByID(client, movie._id, newMovie)
 
-
   return newMovie
 }
 
 async function deleteMovie(id) {
   const movie = await getById(id)
-
   if (movie) {
-
+    await deleteMovieByID(client, movie._id)
   }
-
   return movie
 }
 
-
-module.exports = { getAllMovies, getById, getByTitle, createMovie, updateMovie, deleteMovie, init }
+module.exports = { getAllMovies, getById, getByTitle, createMovie, updateMovie, deleteMovie }

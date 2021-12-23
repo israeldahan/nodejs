@@ -119,7 +119,7 @@ async function modifyMovie(request, response) {
 }
 
 async function deleteMovie(request, response) {
-  const movieId = parseInt(request.params.id)
+  const movieId = request.params.id
   const deletedMovie = await MoviesService.deleteMovie(movieId)
 
   if (!deletedMovie) {
