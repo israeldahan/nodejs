@@ -1,6 +1,6 @@
 const { MongoClient, ObjectId } = require('mongodb')
-const { DB_USER, DB_PASS, DB_HOST } = process.env
-const uri = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/moviesapi`
+const { DB_USER, DB_PASS, DB_HOST, DB_NAME } = process.env
+const uri = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}`
 const client = new MongoClient(uri)
 
 
@@ -22,14 +22,14 @@ const listDatabases = async (client) => {
 
 
   const createListing = async (client, newListing) => {
-    const result = await client.db('moviesapi').collection('movies').insertOne(newListing)
+    const result = await client.db(`${DB_NAME}`).collection('movies').insertOne(newListing)
   
     console.log(`New listing created with the following id: ${result.insertedId}`)
   }
   
   async function updateMovieByTitle(client, title, update) {
     const result = await client
-      .db('moviesapi')
+      .db(`${DB_NAME}`)
       .collection('movies')
       .updateOne({ title }, { $set: update })
     console.log(`${result.matchedCount} document(s) matched the query criteria.`)
@@ -38,7 +38,7 @@ const listDatabases = async (client) => {
 
   async function updateMovieByID(client, _id, update) {
     const result = await client
-      .db('moviesapi')
+      .db(`${DB_NAME}`)
       .collection('movies')
       .updateOne({ _id }, { $set: update })
     console.log(`${result.matchedCount} document(s) matched the query criteria.`)
@@ -49,7 +49,7 @@ const listDatabases = async (client) => {
   async function findMovieByTitle(client, title) {
     re = new RegExp(title, 'i')
     console.log(re)
-    const result = await client.db('moviesapi').collection('movies').findOne({ title: re })
+    const result = await client.db(`${DB_NAME}`).collection('movies').findOne({ title: re })
   
     if (result) {
       console.log(`Found a movie by '${title}':`)
@@ -61,7 +61,7 @@ const listDatabases = async (client) => {
   }
 
   async function findMovieByID(client, ID) {
-    const result = await client.db('moviesapi').collection('movies').findOne({ _id: ObjectId(ID) })
+    const result = await client.db(`${DB_NAME}`).collection('movies').findOne({ _id: ObjectId(ID) })
   
     if (result) {
       console.log(`Found a movie by '${ID}':`)
@@ -75,7 +75,7 @@ const listDatabases = async (client) => {
   async function findMovieManyByTitle(client, title) {
     re = new RegExp(title, 'i')
     console.log(re)
-    const cursor = await client.db('moviesapi').collection('movies').find({ title: re })
+    const cursor = await client.db(`${DB_NAME}`).collection('movies').find({ title: re })
   
     if (cursor) {
       console.log(`Found a movie by '${title}':`)
@@ -89,7 +89,7 @@ const listDatabases = async (client) => {
   
   async function findMovies(client) {
     let res = []
-    const cursor = await client.db('moviesapi').collection('movies').find()
+    const cursor = await client.db(`${DB_NAME}`).collection('movies').find()
   
     if (cursor) {
       res = await cursor.toArray();
@@ -102,7 +102,7 @@ const listDatabases = async (client) => {
 
   
   async function deleteMovieByID(client, id) {
-    const result = await client.db('moviesapi')
+    const result = await client.db(`${DB_NAME}`)
     .collection('movies')
     .deleteOne({ _id: id})
     console.log(`${result.deletedCount} document(s) was/were deleted.`)
