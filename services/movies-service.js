@@ -1,77 +1,49 @@
 const INITIAL_MOVIES = require('./movies.json')
+const { loadAllData, Movie } = require('../db/')
+const InternalError = require('../errors/InternalErorr')
+process.env.RESET_DB == true && loadAllData(INITIAL_MOVIES.movies)
 
-let allMovies = []
-let currentIndex = 0
-
-async function getAllMovies() {
-  return [...allMovies]
-}
-
-async function getById(id) {
-  const movies = await getAllMovies()
-  return movies.find((movie) => movie.id === id)
-}
-
-async function getByTitle(title) {
-  const movies = await getAllMovies()
-  return movies.find((movie) => movie.title === title)
-}
-
-async function createMovie({ title, img, synopsis, rating, year }) {
-  const newMovie = {
-    id: getNextIndex(),
-    title,
-    img,
-    synopsis,
-    rating,
-    year,
+async function getAllMovies(offset, limit) {
+  const request = Movie.find()
+  if (offset) {
+    request.skip(offset)
   }
-
-  allMovies = [...allMovies, newMovie]
-  return newMovie
+  if (limit) {
+    request.limit(limit)
+  }
+  return request
 }
 
 async function updateMovie(id, { title, img, synopsis, rating, year }) {
-  const movie = await getById(id)
-  const movieIndex = allMovies.indexOf(movie)
-  const newMovieObject = {
-    id,
-    title,
-    img,
-    synopsis,
-    rating,
-    year,
-  }
-
-  const newAlMovies = [...allMovies]
-  newAlMovies[movieIndex] = newMovieObject
-  allMovies = newAlMovies
-
+  const newMovieObject = await Movie.findOneAndReplace({ movie_id: id }, { title, img, synopsis, rating, year })
   return newMovieObject
 }
 
-async function deleteMovie(id) {
-  const movie = await getById(id)
-
-  if (movie) {
-    const movieIndex = allMovies.indexOf(movie)
-    const newAllMovies = [...allMovies]
-    newAllMovies.splice(movieIndex, 1)
-    allMovies = newAllMovies
-  }
-
+async function getMovie(movieId) {
+  const movie = await Movie.findOne({ movie_id: movieId })
   return movie
 }
 
-function init() {
-  allMovies = [...INITIAL_MOVIES.movies]
-  currentIndex = allMovies[allMovies.length - 1].id
+async function getByTitle(title) {
+  const movie = await Movie.findOne({ title })
+  return movie
 }
 
-function getNextIndex() {
-  return ++currentIndex
+async function createMovie({ title, img, synopsis, rating, year }) {
+  const nextMovieId = await getNextMovieId()
+  const movie = new Movie({ title, img, synopsis, rating, year, movie_id: nextMovieId })
+  movie.save()
+  return movie
 }
 
-init()
+async function deleteMovie(id) {
+  const deletedMovie = await Movie.findOneAndDelete({ movie_id: id })
+  return deletedMovie
+}
 
-module.exports = { getAllMovies, getById, getByTitle, createMovie, updateMovie, deleteMovie, init }
+async function getNextMovieId() {
+  const lastMovie = await Movie.findOne({}, {}, { sort: { movie_id: -1 } })
+  return ++lastMovie.movie_id
+}
+
+module.exports = { getAllMovies, getMovie, getByTitle, createMovie, updateMovie, deleteMovie }

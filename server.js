@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const serverLog = require('./serverLog')
 const addDate = require('./middleware/addDate')
